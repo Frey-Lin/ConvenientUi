@@ -1,4 +1,4 @@
-package com.scorpio;
+package com.sample;
 
 import org.junit.Test;
 

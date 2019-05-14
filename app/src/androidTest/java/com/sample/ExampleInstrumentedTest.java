@@ -1,4 +1,4 @@
-package com.scorpio.ui;
+package com.sample;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.scorpio.ui.test", appContext.getPackageName());
+        assertEquals("com.scorpio", appContext.getPackageName());
     }
 }
