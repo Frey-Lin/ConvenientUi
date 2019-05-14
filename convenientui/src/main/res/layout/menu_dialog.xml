@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ListView
+        android:id="@+id/mMenuItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/mCancelBtn"
+        android:background="@drawable/host_dialog_bg" />
+
+    <Button
+        android:id="@+id/mCancelBtn"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp45"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="@dimen/sp13"
+        android:layout_marginBottom="@dimen/dp13"
+        android:background="@drawable/host_dialog_cancel_selector"
+        android:text="取消"
+        android:textColor="@color/color_333333"
+        android:textSize="@dimen/sp16" />
+
+
+</RelativeLayout>

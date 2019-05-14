@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CountDownButton">
+        <attr name="startNum" format="integer" />
+        <attr name="endNum" format="integer" />
+        <attr name="startText" format="string" />
+        <attr name="endText" format="string" />
+        <attr name="unit" format="string"/>
+    </declare-styleable>
+
+    <declare-styleable name="RatioLayout">
+        <attr name="ratio" format="float|integer" />
+    </declare-styleable>
+    <declare-styleable name="RoundCornerImageView">
+        <attr name="radius" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="SurperRadioGroup">
+        <attr name="selectedId" format="reference" />
+    </declare-styleable>
+
+    <!-- TabLayout可滑动指示器 -->
+    <declare-styleable name="ShapeIndicatorView">
+        <attr name="horizontalSpace" format="reference|integer" />
+        <attr name="fullColor" format="reference|color" />
+        <attr name="strokeWidth" format="reference|integer" />
+        <attr name="selectedColor" format="string" />
+        <attr name="normalColor" format="string" />
+    </declare-styleable>
+
+    <declare-styleable name="CountView">
+        <attr name="direction">
+            <enum name="vertical_top_increation" value="1"/>
+            <enum name="vertical_bottom_increation" value="2"/>
+            <enum name="horizontal_left_increation" value="3"/>
+            <enum name="horizontal_right_increation" value="4"/>
+        </attr>
+        <attr name="increase_drawable" format="reference|color" />
+        <attr name="decrease_drawable" format="reference|color" />
+        <attr name="count_textSize" format="dimension" />
+        <attr name="count_textColor" format="color|reference" />
+        <attr name="count_margin" format="dimension" />
+        <attr name="count_drawable_bottom" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="ProgressBarWithText">
+        <attr name="showText" format="boolean" />
+        <attr name="max" format="integer" />
+        <attr name="min" format="integer" />
+        <attr name="textFormat" format="string" />
+        <attr name="textColor" format="color" />
+        <attr name="textSize" format="dimension" />
+        <attr name="corner" format="dimension" />
+        <attr name="textMarginBottom" format="dimension" />
+        <attr name="proBackground" format="reference|color" />
+        <attr name="proForground" format="reference|color" />
+    </declare-styleable>
+
+    <declare-styleable name="CustomTitleBar">
+        <attr name="showBottomLine" format="boolean" />
+        <attr name="showBackBtn" format="boolean" />
+        <attr name="showRight" format="boolean" />
+        <attr name="backDrawable" format="color|reference" />
+        <attr name="titleTextSize" format="dimension" />
+        <attr name="titleText" format="string" />
+        <attr name="titleTextColor" format="color" />
+        <attr name="titleGravity" format="string" />
+        <attr name="rightBackground" format="reference|color" />
+        <attr name="rightText" format="string" />
+        <attr name="rightTextSize" format="dimension" />
+        <attr name="rightTextColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="FlowLayout">
+        <attr name="max_select" format="integer"></attr>
+        <attr name="tag_gravity">
+            <enum name="left" value="-1" />
+            <enum name="center" value="0" />
+            <enum name="right" value="1" />
+        </attr>
+    </declare-styleable>
+
+</resources>
