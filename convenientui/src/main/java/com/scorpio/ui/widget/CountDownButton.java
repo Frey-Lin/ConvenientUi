@@ -5,9 +5,10 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v7.widget.AppCompatButton;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+
+import androidx.appcompat.widget.AppCompatButton;
 
 import com.scorpio.ui.R;
 
@@ -70,7 +71,7 @@ public class CountDownButton extends AppCompatButton {
         startNum = typedArray.getInt(R.styleable.CountDownButton_startNum, 60);
         endNum = typedArray.getInt(R.styleable.CountDownButton_endNum, 0);
         unit = typedArray.getString(R.styleable.CountDownButton_unit);
-        if(TextUtils.isEmpty(unit)){
+        if (TextUtils.isEmpty(unit)) {
             unit = "s";
         }
         currentNum = startNum;
