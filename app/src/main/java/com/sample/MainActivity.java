@@ -1,9 +1,10 @@
 package com.sample;
 
-import android.support.v7.app.AppCompatActivity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.scorpio.ui.dialog.MenuDialog;
 import com.scorpio.ui.widget.CountDownButton;
@@ -41,6 +42,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 countDownButton.startCountDown();
+            }
+        });
+
+
+        findViewById(R.id.gotoRefreshActivity).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, RefreshAndLoadMoreActivity.class));
             }
         });
 

@@ -79,4 +79,11 @@
         </attr>
     </declare-styleable>
 
+    <declare-styleable name="RefreshLayout">
+        <attr name="pullToRefreshEnable" format="boolean" />
+        <attr name="loadMoreEnable" format="boolean" />
+        <attr name="headerLayout" format="reference" />
+        <attr name="bottomLayout" format="reference" />
+    </declare-styleable>
+
 </resources>

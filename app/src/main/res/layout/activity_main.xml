@@ -36,5 +36,11 @@
             android:layout_width="@dimen/dp40"
             android:layout_height="@dimen/dp80"/>
 
+        <Button
+            android:id="@+id/gotoRefreshActivity"
+            android:text="go to refresh activity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
     </LinearLayout>
 </ScrollView>

@@ -1,8 +1,6 @@
 package com.scorpio.ui.dialog;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +12,9 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.scorpio.ui.R;
 import com.scorpio.ui.util.DeviceInfo;
@@ -82,7 +83,7 @@ public class MenuDialog extends BaseDialog {
             dialog.setCanceledOnTouchOutside(false);
             int diaWidth = DeviceInfo.getScreenWidth(mContext);
             initDialogView(dialog);
-            dialog.setSize((int) (diaWidth * 0.9f),WindowManager.LayoutParams.WRAP_CONTENT);
+            dialog.setSize((int) (diaWidth * 0.9f), WindowManager.LayoutParams.WRAP_CONTENT);
             dialog.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
             dialog.setOnItemClickListener(listener);
             dialog.setMenuItems(menuItems);
