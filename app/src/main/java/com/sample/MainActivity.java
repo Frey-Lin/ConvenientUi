@@ -1,12 +1,16 @@
 package com.sample;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.scorpio.ui.dialog.MenuDialog;
+import com.scorpio.ui.drawable.CircularProgressDrawable;
+import com.scorpio.ui.util.DensityUtil;
 import com.scorpio.ui.widget.CountDownButton;
 
 import java.util.ArrayList;
@@ -52,6 +56,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, RefreshAndLoadMoreActivity.class));
             }
         });
+
+        ImageView circleImg = findViewById(R.id.circleImg);
+        CircularProgressDrawable drawable = new CircularProgressDrawable(this, Color.RED, DensityUtil.dip2px(this,10));
+        circleImg.setImageDrawable(drawable);
+        drawable.start();
 
     }
 

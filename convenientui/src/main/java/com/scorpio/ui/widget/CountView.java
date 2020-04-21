@@ -89,7 +89,7 @@ public class CountView extends RelativeLayout implements View.OnClickListener {
     }
 
     private void addChild(Context context) {
-        int dp20 = DensityUtil.dip2px(context, 20);
+        int dp20 = (int) DensityUtil.dip2px(context, 20);
         LayoutParams increaseBtnLp = new LayoutParams(dp20, dp20);
         LayoutParams decreaseBtnLp = new LayoutParams(dp20, dp20);
         LayoutParams countTvLp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
