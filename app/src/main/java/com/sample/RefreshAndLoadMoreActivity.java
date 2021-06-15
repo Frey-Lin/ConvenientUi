@@ -1,17 +1,17 @@
 package com.sample;
 
-import android.os.Handler;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.scorpio.ui.widget.RefreshLayout;
 
@@ -41,23 +41,23 @@ public class RefreshAndLoadMoreActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onReadyToRefresh() {
+            public void onReadyToRefresh(View headerView) {
 
             }
 
             @Override
-            public void onRefreshing() {
+            public void onRefreshing(View headerView) {
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mRefreshLayout.finishRefresh();
+                        mRefreshLayout.finish();
                     }
-                }, 1500);
+                }, 1000);
             }
 
             @Override
-            public void onEndRefresh() {
-                Toast.makeText(RefreshAndLoadMoreActivity.this, "finish refreshing", Toast.LENGTH_SHORT).show();
+            public void onEndRefresh(View headerView) {
+
             }
         });
 
@@ -68,23 +68,38 @@ public class RefreshAndLoadMoreActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onReadyToLoadMore() {
+            public void onReadyToLoadMore(View footerView) {
 
             }
 
             @Override
-            public void onLoading() {
+            public void onLoading(View footerView) {
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mRefreshLayout.finishLoadMore();
+                        mRefreshLayout.finish();
                     }
-                }, 1500);
+                }, 1000);
             }
 
             @Override
-            public void onEndLoading() {
-                Toast.makeText(RefreshAndLoadMoreActivity.this, "finish load more", Toast.LENGTH_SHORT).show();
+            public void onEndLoading(View footerView) {
+
+            }
+        });
+
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                Log.e("activity", "onScrollStateChanged");
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                Log.e("activity", "onScrolled");
             }
         });
     }

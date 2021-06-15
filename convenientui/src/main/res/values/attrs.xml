@@ -5,14 +5,14 @@
         <attr name="endNum" format="integer" />
         <attr name="startText" format="string" />
         <attr name="endText" format="string" />
-        <attr name="unit" format="string"/>
+        <attr name="unit" format="string" />
     </declare-styleable>
 
     <declare-styleable name="RatioLayout">
         <attr name="ratio" format="float|integer" />
     </declare-styleable>
     <declare-styleable name="RoundCornerImageView">
-        <attr name="radius" format="integer" />
+        <attr name="radius" format="float" />
     </declare-styleable>
     <declare-styleable name="SurperRadioGroup">
         <attr name="selectedId" format="reference" />
@@ -29,10 +29,10 @@
 
     <declare-styleable name="CountView">
         <attr name="direction">
-            <enum name="vertical_top_increation" value="1"/>
-            <enum name="vertical_bottom_increation" value="2"/>
-            <enum name="horizontal_left_increation" value="3"/>
-            <enum name="horizontal_right_increation" value="4"/>
+            <enum name="vertical_top_increation" value="1" />
+            <enum name="vertical_bottom_increation" value="2" />
+            <enum name="horizontal_left_increation" value="3" />
+            <enum name="horizontal_right_increation" value="4" />
         </attr>
         <attr name="increase_drawable" format="reference|color" />
         <attr name="decrease_drawable" format="reference|color" />
@@ -84,6 +84,19 @@
         <attr name="loadMoreEnable" format="boolean" />
         <attr name="headerLayout" format="reference" />
         <attr name="bottomLayout" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="HorizontalScrollTabLayout">
+        <attr name="indicatorDrawable" format="reference" />
+        <attr name="indicatorWidth" format="dimension" />
+        <attr name="indicatorHeight" format="dimension" />
+        <attr name="indicatorPadding" format="dimension" />
+        <attr name="layoutMode">
+            <enum name="average" value="1" />
+            <enum name="none" value="2" />
+            <enum name="averageMaxCount" value="3" />
+        </attr>
+        <attr name="averageMaxCount" format="integer" />
     </declare-styleable>
 
 </resources>

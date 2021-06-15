@@ -5,10 +5,9 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v7.widget.AppCompatButton;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-
-import androidx.appcompat.widget.AppCompatButton;
 
 import com.scorpio.ui.R;
 

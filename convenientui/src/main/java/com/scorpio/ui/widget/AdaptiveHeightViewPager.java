@@ -1,10 +1,10 @@
 package com.scorpio.ui.widget;
 
 import android.content.Context;
+import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.View;
 
-import androidx.viewpager.widget.ViewPager;
 
 /**
  * A viewpager which could adjust its height by the highest child

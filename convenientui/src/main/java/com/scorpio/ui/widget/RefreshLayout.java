@@ -2,6 +2,10 @@ package com.scorpio.ui.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,11 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Scroller;
-
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.scorpio.ui.R;
 
@@ -185,11 +184,16 @@ public class RefreshLayout extends LinearLayout {
                     break;
                 if (mScrollableView instanceof RecyclerView) {
                     RecyclerView recyclerView = (RecyclerView) mScrollableView;
+                    int itemCount = 0;
+                    if (recyclerView.getAdapter() != null) {
+                        itemCount = recyclerView.getAdapter().getItemCount();
+                    }
                     RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
                     int firstPosition = -1;//第一个完全显示的item
                     int lastPosition = -1;//最后一个完全显示的item
                     if (layoutManager instanceof LinearLayoutManager) {
                         firstPosition = ((LinearLayoutManager) layoutManager).findFirstCompletelyVisibleItemPosition();
+                        Log.e(TAG, "firstPosition = " + firstPosition);
                         lastPosition = ((LinearLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition();
                     } else if (layoutManager instanceof StaggeredGridLayoutManager) {
                         int pos[] = new int[((StaggeredGridLayoutManager) layoutManager).getSpanCount()];
@@ -204,10 +208,11 @@ public class RefreshLayout extends LinearLayout {
                         throw new RuntimeException("Unsupported LayoutManager, can only be LinearLayoutManager, GridLayoutManager or StaggeredGridLayoutManager");
                     }
 
-                    if ((firstPosition == 0 && deltaY > 0 && Math.abs(deltaY) > Math.abs(deltaX)) ||
+                    if (((firstPosition == 0 || itemCount <= 0) && deltaY > 0 && Math.abs(deltaY) > Math.abs(deltaX)) ||
                             (getScrollY() < 0 && Math.abs(deltaY) > Math.abs(deltaX))) {
                         //滑至最顶部并且向下滑，或者RefreshLayout的内容已经向下滑了一段距离
                         mMode = MODE_REFRESH;
+                        Log.e(TAG, "onInterceptTouchEvent mode = refresh");
                         intercept = true;
                     } else if (deltaY < 0 && Math.abs(deltaY) > Math.abs(deltaX) && lastPosition == layoutManager.getItemCount() - 1
                             || getScrollY() > 0 && Math.abs(deltaY) > Math.abs(deltaX)) {
@@ -221,7 +226,7 @@ public class RefreshLayout extends LinearLayout {
                     ListView listView = (ListView) mScrollableView;
                     int firstPosition = listView.getFirstVisiblePosition();
                     int lastPosition = listView.getLastVisiblePosition();
-                    if ((firstPosition == 0 && deltaY > 0 && Math.abs(deltaY) > Math.abs(deltaX) && listView.getChildAt(0).getTop() >= 0) ||
+                    if ((firstPosition <= 0 && deltaY > 0 && Math.abs(deltaY) > Math.abs(deltaX) && listView.getChildAt(0).getTop() >= 0) ||
                             (getScrollY() < 0 && Math.abs(deltaY) > Math.abs(deltaX))) {
                         mMode = MODE_REFRESH;
                         intercept = true;
@@ -287,6 +292,7 @@ public class RefreshLayout extends LinearLayout {
                 break;
 
             case MotionEvent.ACTION_MOVE:
+                Log.e(TAG, "onTouchEvent action move");
                 float deltaY = event.getY() - mLastTouchY;
                 //下拉刷新模式
                 if (mMode == MODE_REFRESH) {
@@ -309,7 +315,7 @@ public class RefreshLayout extends LinearLayout {
                         if (getScrollY() <= -mHeaderView.getHeight()) {//向下滑动的距离大于等于mHeaderView的高度，可以准备刷新
                             mStatus = STATUS_READY_REFRESH;
                             if (mRefreshStatusCallback != null) {
-                                mRefreshStatusCallback.onReadyToRefresh();
+                                mRefreshStatusCallback.onReadyToRefresh(mHeaderView);
                             }
                         }
                     }
@@ -332,7 +338,7 @@ public class RefreshLayout extends LinearLayout {
                     if (getScrollY() >= mFooterView.getHeight()) {
                         mStatus = STATUS_READY_LOADMORE;
                         if (mLoadMoreStatusCallback != null) {
-                            mLoadMoreStatusCallback.onReadyToLoadMore();
+                            mLoadMoreStatusCallback.onReadyToLoadMore(mFooterView);
                         }
                     }
                 } else {
@@ -348,7 +354,7 @@ public class RefreshLayout extends LinearLayout {
                     mStatus = STATUS_REFRESHING;
                     smoothScroll(-getScrollY() - mHeaderView.getHeight());
                     if (mRefreshStatusCallback != null) {
-                        mRefreshStatusCallback.onRefreshing();
+                        mRefreshStatusCallback.onRefreshing(mHeaderView);
                     }
                 } else if (mStatus == STATUS_SLIDE_UP_LOADMORE) {
                     mStatus = STATUS_NORMAL;
@@ -356,7 +362,7 @@ public class RefreshLayout extends LinearLayout {
                 } else if (mStatus == STATUS_READY_LOADMORE) {
                     mStatus = STATUS_LOADING;
                     if (mLoadMoreStatusCallback != null) {
-                        mLoadMoreStatusCallback.onLoading();
+                        mLoadMoreStatusCallback.onLoading(mFooterView);
                     }
                 }
                 break;
@@ -387,7 +393,7 @@ public class RefreshLayout extends LinearLayout {
         mStatus = STATUS_NORMAL;
         smoothScroll(-getScrollY());
         if (mRefreshStatusCallback != null) {
-            mRefreshStatusCallback.onEndRefresh();
+            mRefreshStatusCallback.onEndRefresh(mHeaderView);
         }
     }
 
@@ -395,7 +401,15 @@ public class RefreshLayout extends LinearLayout {
         mStatus = STATUS_NORMAL;
         smoothScroll(-getScrollY());
         if (mLoadMoreStatusCallback != null) {
-            mLoadMoreStatusCallback.onEndLoading();
+            mLoadMoreStatusCallback.onEndLoading(mFooterView);
+        }
+    }
+
+    public void finish() {
+        if (mStatus == STATUS_REFRESHING) {
+            finishRefresh();
+        } else if (mStatus == STATUS_LOADING) {
+            finishLoadMore();
         }
     }
 
@@ -411,20 +425,20 @@ public class RefreshLayout extends LinearLayout {
     public interface RefreshStatusCallback {
         void onStartPullDownRefresh(View headerView, float scrollY, int headerHeight, float deltaY);
 
-        void onReadyToRefresh();
+        void onReadyToRefresh(View headerView);
 
-        void onRefreshing();
+        void onRefreshing(View headerView);
 
-        void onEndRefresh();
+        void onEndRefresh(View headerView);
     }
 
     public interface LoadMoreStatusCallback {
         void onStartLoadMore(View footerView, float scrollY, int footViewHeight, float deltaY);
 
-        void onReadyToLoadMore();
+        void onReadyToLoadMore(View footerView);
 
-        void onLoading();
+        void onLoading(View footerView);
 
-        void onEndLoading();
+        void onEndLoading(View footerView);
     }
 }

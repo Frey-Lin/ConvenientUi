@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -18,36 +17,48 @@
 
         <com.scorpio.ui.widget.CountDownButton
             android:id="@+id/btnCountDown"
-            android:layout_marginTop="@dimen/dp10"
+            android:layout_width="@dimen/dp80"
+            android:layout_height="@dimen/dp30"
             android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/dp10"
             android:background="@drawable/shape_rect_round_corner_orange_10dp"
-            app:startText="获取验证码"
+            android:gravity="center"
+            app:endNum="0"
             app:endText="重新获取"
             app:startNum="60"
-            app:unit="秒"
-            app:endNum="0"
-            android:gravity="center"
-            android:layout_width="@dimen/dp80"
-            android:layout_height="@dimen/dp30" />
+            app:startText="获取验证码"
+            app:unit="秒" />
 
         <com.scorpio.ui.widget.CountView
-            app:count_textColor="@color/color_4d4d4d"
-            app:direction="vertical_bottom_increation"
             android:layout_width="@dimen/dp40"
-            android:layout_height="@dimen/dp80"/>
+            android:layout_height="@dimen/dp80"
+            app:count_textColor="@color/color_4d4d4d"
+            app:direction="vertical_bottom_increation" />
 
         <Button
             android:id="@+id/gotoRefreshActivity"
-            android:text="go to refresh activity"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:text="go to refresh activity" />
 
         <ImageView
             android:id="@+id/circleImg"
-            android:layout_marginTop="20dp"
-            android:layout_gravity="center_horizontal"
             android:layout_width="100dp"
-            android:layout_height="100dp"/>
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp" />
 
+        <com.scorpio.ui.widget.HorizontalScrollTabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            app:indicatorDrawable="@drawable/line_orange_3dp"
+            app:indicatorHeight="3dp"
+            app:layoutMode="average"
+            app:averageMaxCount="5"
+            app:indicatorWidth="100dp">
+
+
+        </com.scorpio.ui.widget.HorizontalScrollTabLayout>
     </LinearLayout>
 </ScrollView>
