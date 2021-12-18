@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -95,6 +94,11 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+        // 需要在onLayout中调用setItem，onLayout执行完后才可以得到每个tab的left和指示器的宽度
+        if (!mSetItemOnce) {
+            setItem(curIndex);
+            mSetItemOnce = true;
+        }
     }
 
     @Override
@@ -106,7 +110,6 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
                 mContainer.getChildAt(i).getLayoutParams().width = perWidth;
             }
         }
-        setItem(curIndex);
     }
 
     @Override
@@ -142,17 +145,6 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
     private void init(Context context, AttributeSet attrs) {
         LayoutInflater.from(context).inflate(R.layout.tablayout, this);
         mContainer = findViewById(R.id.container);
-        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            // 这个方法会多次调用，当ViewPager滑动的时候，会修改指示器的位置，这个方法会被触发，导致指示器位置跳跃
-            @Override
-            public void onGlobalLayout() {
-                Log.e(TAG, "onGlobalLayout curIndex = " + curIndex);
-//                if (!mSetItemOnce) {
-//                    setItem(curIndex);
-//                    mSetItemOnce = true;
-//                }
-            }
-        });
         mScrollView = findViewById(R.id.scrollView);
         indicator = findViewById(R.id.line);
 
@@ -358,12 +350,15 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
         switchViewPager(position);
     }
 
+    /**
+     *
+     */
     private void makeIndicatorCenter() {
         int indicatorLeft = indicator.getLeft();
         View lastView = mContainer.getChildAt(mContainer.getChildCount() - 1);
-        if ((lastView.getRight() < getWidth()
-                || indicatorLeft < (getWidth() - indicator.getWidth()) / 2
-                || lastView.getRight() - indicator.getRight() < (getWidth() - indicator.getWidth()) / 2)
+        if ((lastView.getRight() < getWidth()// 最后一个tab的右边小于控件的宽度，即能显示所有的完整的tab
+                || indicatorLeft < (getWidth() - indicator.getWidth()) / 2 // 指示器在居中位置偏左的位置，并且第一个tab完全显示
+                || lastView.getRight() - indicator.getRight() < (getWidth() - indicator.getWidth()) / 2) // 指示器位置在居中位置偏右的位置，并且最后一个tab完全显示
                 && (indicatorLeft - getWidth() / 2 > mScrollView.getScrollX()
                 && indicatorLeft - mScrollView.getScrollX() <= (getWidth() - indicator.getWidth()) / 2)) {
             return;

@@ -53,6 +53,7 @@ public class TabLayoutActivity extends AppCompatActivity {
             item.setText(i + 1 + "");
             tabLayout.addTab(view);
         }
+        tabLayout.setItem(1);
     }
 
     private class MyPageAdapter extends PagerAdapter {
