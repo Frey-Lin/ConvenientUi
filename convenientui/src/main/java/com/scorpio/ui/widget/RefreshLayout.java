@@ -262,7 +262,10 @@ public class RefreshLayout extends LinearLayout {
         mLastInterceptY = ev.getY();
         mLastTouchX = ev.getX();
         mLastTouchY = ev.getY();
-        return intercept;
+        if (intercept) {
+            return true;
+        }
+        return super.onInterceptTouchEvent(ev);
     }
 
     private int findMax(int[] pos) {

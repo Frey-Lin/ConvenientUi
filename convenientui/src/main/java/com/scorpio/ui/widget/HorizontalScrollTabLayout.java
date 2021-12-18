@@ -10,11 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 
 import com.scorpio.ui.R;
 import com.scorpio.ui.util.DensityUtil;
@@ -27,15 +27,30 @@ import java.util.List;
  */
 
 public class HorizontalScrollTabLayout extends RelativeLayout {
+    /**
+     * 所有tab的容器
+     */
     private LinearLayout mContainer;
+    /**
+     * 和HorizontalScrollTabLayout绑定的ViewPager，可能为null
+     */
     private ViewPager mViewPager;
+    /**
+     * 水平滑动的ScrollView
+     */
     private HorizontalScrollView mScrollView;
     private final static String TAG = "tab";
+    /**
+     * tab的指示器
+     */
     private ImageView indicator;
+    /**
+     * 监听ViewPager页面的变化
+     */
     private TabLayoutOnPageChangeListener mListener;
     private List<View> views = new ArrayList<>();
     private int margin;
-    int curIndex = -1;
+    int curIndex;
     boolean firstBoot = true;
     private boolean isIndicatorsShouldScroll = true;
     private OnTabSelectListener mTabSelectListener;
@@ -91,6 +106,7 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
                 mContainer.getChildAt(i).getLayoutParams().width = perWidth;
             }
         }
+        setItem(curIndex);
     }
 
     @Override
@@ -122,6 +138,40 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
         super.onFinishInflate();
     }
 
+
+    private void init(Context context, AttributeSet attrs) {
+        LayoutInflater.from(context).inflate(R.layout.tablayout, this);
+        mContainer = findViewById(R.id.container);
+        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            // 这个方法会多次调用，当ViewPager滑动的时候，会修改指示器的位置，这个方法会被触发，导致指示器位置跳跃
+            @Override
+            public void onGlobalLayout() {
+                Log.e(TAG, "onGlobalLayout curIndex = " + curIndex);
+//                if (!mSetItemOnce) {
+//                    setItem(curIndex);
+//                    mSetItemOnce = true;
+//                }
+            }
+        });
+        mScrollView = findViewById(R.id.scrollView);
+        indicator = findViewById(R.id.line);
+
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.HorizontalScrollTabLayout);
+        Drawable drawable = typedArray.getDrawable(R.styleable.HorizontalScrollTabLayout_indicatorDrawable);
+        indicator.setImageDrawable(drawable);
+
+        int indicatorWidth = typedArray.getDimensionPixelSize(R.styleable.HorizontalScrollTabLayout_indicatorWidth, (int) DensityUtil.dip2px(context, 20));
+        indicator.getLayoutParams().width = indicatorWidth;
+        int indicatorHeight = typedArray.getDimensionPixelSize(R.styleable.HorizontalScrollTabLayout_indicatorHeight, (int) DensityUtil.dip2px(context, 20));
+        indicator.getLayoutParams().height = indicatorHeight;
+        int indicatorPadding = typedArray.getDimensionPixelSize(R.styleable.HorizontalScrollTabLayout_indicatorPadding, 0);
+        ((MarginLayoutParams) indicator.getLayoutParams()).topMargin = indicatorPadding;
+
+        mLayoutMode = typedArray.getInt(R.styleable.HorizontalScrollTabLayout_layoutMode, 2);
+        mAverageMaxCount = typedArray.getInt(R.styleable.HorizontalScrollTabLayout_averageMaxCount, 3);
+        typedArray.recycle();
+    }
+
     public void addTab(View view) {
         addTab(view, view.getLayoutParams());
     }
@@ -143,9 +193,8 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
             public void onClick(View v) {
                 int index = mContainer.indexOfChild(v);
                 setItem(index);
-                if (mViewPager != null && index < mViewPager.getAdapter().getCount()) {
+                if (mViewPager != null && index >= 0 && index < mViewPager.getAdapter().getCount()) {
                     isIndicatorsShouldScroll = false;
-                    mViewPager.setCurrentItem(index);
                 }
                 if (mTabSelectListener != null) {
                     mTabSelectListener.onTabSelected(v, index);
@@ -162,12 +211,10 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
         if (indicator != null && indicator.getVisibility() != View.VISIBLE) {
             indicator.setVisibility(View.VISIBLE);
         }
-        //setItem(0);
     }
 
 
     public void setupViewPager(ViewPager viewPager) {
-        setItem(0);
         if (mListener == null) {
             mListener = new TabLayoutOnPageChangeListener();
         }
@@ -182,7 +229,12 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
 
     class TabLayoutOnPageChangeListener implements ViewPager.OnPageChangeListener {
 
-
+        /**
+         * @param position             当前页面
+         * @param positionOffset       当前页面偏移的百分比，向下一页滑动时，positionOffset从[0-1)变化, 向上一页滑动时从(1-0]变化
+         * @param positionOffsetPixels 当前页面偏移的像素 向下一页滑动时，positionOffsetPixels从[0-pageWidth)变化， 向上一页滑动时
+         *                             从(pageWidth-0]变化
+         */
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             Log.e(TAG, "=============onPageScrolled=" + positionOffset);
@@ -197,22 +249,29 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
 //                if (positionOffset == 0) {
 //                    return;
 //                }
+            // 往下一页滑动
             if (position == tempCurIndex) {
                 Log.e(TAG, "向右滑");
                 if (tempCurIndex == mContainer.getChildCount() - 1) {
                     return;
                 }
-                int lineWidth = indicator.getWidth();
+                // 当前选中的tab的宽度
                 int v1Width = mContainer.getChildAt(tempCurIndex).getWidth();
+                // 下一个tab的宽度
                 int v2Width = mContainer.getChildAt(tempCurIndex + 1).getWidth();
-                int len = lineWidth + (v1Width - lineWidth) / 2 + (v2Width - lineWidth) / 2;
+                // 指示器到下个tab之间移动的最大距离
+                int maxDistanceToNextTab = (v1Width + v2Width) / 2;
                 if (isIndicatorsShouldScroll) {
-                    ((FrameLayout.LayoutParams) indicator.getLayoutParams()).leftMargin = tempMargin + (int) (len * positionOffset);
-                    indicator.requestLayout();
+                    moveIndicatorTo(tempMargin + (int) (maxDistanceToNextTab * positionOffset));
                 }
                 int nextRight = mContainer.getChildAt(tempCurIndex + 1).getRight() - scrollX;
+                // 如果下个tab的右边显示不全
                 if (nextRight > mScrollView.getRight()) {
-                    mScrollView.smoothScrollTo(scrollX + (int) (len * positionOffset), 0);
+                    // positionOffset不会等于1，需手动设置
+                    if (positionOffset > 0.9) {
+                        positionOffset = 1;
+                    }
+                    //mScrollView.smoothScrollTo(scrollX + (int) (maxDistanceToNextTab * positionOffset), 0);
                 }
                 Log.e(TAG, "mScrollView.getScrollX=" + mScrollView.getScrollX());
                 if (positionOffset <= 0.5) {
@@ -220,7 +279,7 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
                 } else {
 
                 }
-            } else if (position < tempCurIndex) {
+            } else if (position < tempCurIndex) {// 往上一页滑动
                 Log.e(TAG, "向左滑");
                 if (tempCurIndex == 0) {
                     return;
@@ -228,18 +287,19 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
                 int lineWidth = indicator.getWidth();
                 int v1Width = mContainer.getChildAt(tempCurIndex).getWidth();
                 int v2Width = mContainer.getChildAt(tempCurIndex - 1).getWidth();
-                int len = lineWidth + (v1Width - lineWidth) / 2 + (v2Width - lineWidth) / 2;
+                // 指示器到上一个tab的最大移动距离
+                int maxDistanceToLastTab = (v1Width + v2Width) / 2;
                 Log.e(TAG, "向左滑margin:" + margin);
-                int offest = (int) (len * (1 - positionOffset));
+                int offset = (int) (maxDistanceToLastTab * (1 - positionOffset));
                 if (isIndicatorsShouldScroll) {
-                    ((FrameLayout.LayoutParams) indicator.getLayoutParams()).leftMargin = tempMargin - offest;
-                    indicator.requestLayout();
+                    moveIndicatorTo(tempMargin - offset);
                 }
                 int lastLeft = mContainer.getChildAt(position).getLeft() - scrollX;
                 if (lastLeft < 0) {
-                    mScrollView.smoothScrollTo(scrollX - (int) (len * (1 - positionOffset)), 0);
+                    //mScrollView.smoothScrollTo(scrollX - (int) (maxDistanceToLastTab * (1 - positionOffset)), 0);
                 }
             }
+            makeIndicatorCenter();
             lastOffsetPixels = positionOffsetPixels;
         }
 
@@ -248,48 +308,74 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
             Log.e(TAG, "onPageSelected position = " + position);
             curIndex = position;
             Log.e(TAG, "margin:" + margin);
+            if (mTabSelectListener != null) {
+                mTabSelectListener.onTabSelected(mContainer.getChildAt(position), position);
+            }
         }
 
         @Override
         public void onPageScrollStateChanged(int state) {
+            // 一个常规的state顺序为1-2-0
+            Log.e(TAG, "onPageScrollStateChanged state=" + state);
             if (mContainer.getChildCount() <= 0)
                 return;
             if (state == 1) {//开始滑动
-                tempMargin = ((FrameLayout.LayoutParams) indicator.getLayoutParams()).leftMargin;
-                tempCurIndex = curIndex;
+                // 快速滑动时，onPageScrollStateChanged会被调用多次，状态为1-2-1-2-0，如果对tempMargin和tempCurIndex重新赋值会使计算错误
+                //tempMargin = ((MarginLayoutParams) indicator.getLayoutParams()).leftMargin;
+                //tempCurIndex = curIndex;
                 scrollX = mScrollView.getScrollX();
             } else if (state == 0) {//nothing
-                tempMargin = margin;
                 tempCurIndex = curIndex;
                 scrollX = mScrollView.getScrollX();
                 isIndicatorsShouldScroll = true;
                 setItem(curIndex);
                 margin = mContainer.getChildAt(curIndex).getLeft() + (mContainer.getChildAt(curIndex).getWidth() - indicator.getWidth()) / 2;
+                if (curIndex == 0) {
+                    // 滑动结束后选中第一个tab，则滑动到最左边
+                    mScrollView.fullScroll(ScrollView.FOCUS_LEFT);
+                } else if (curIndex == mContainer.getChildCount() - 1) {
+                    // 滑动结束后选中最后一个tab，则滑动到最右边
+                    mScrollView.fullScroll(ScrollView.FOCUS_RIGHT);
+                } else {
+                    makeIndicatorCenter();
+                }
             }
-            Log.e(TAG, "onPageScrollStateChanged state=" + state);
         }
     }
 
-    public void setItem(int i) {
-        if (i < 0 || i > mContainer.getChildCount() - 1) {
+    public void setItem(int position) {
+        if (position < 0 || position > mContainer.getChildCount() - 1) {
             return;
         }
         reset();
-        View child = mContainer.getChildAt(i);
+        View child = mContainer.getChildAt(position);
         child.setSelected(true);
-        int left = child.getLeft();
-        Log.e(TAG, "left=" + left);
-        // int childWidth = child.getLayoutParams().width;
-        int childWidth = child.getMeasuredWidth();
-        int indicatorsWidth = indicator.getMeasuredWidth();
-        Log.e(TAG, "child.getWidth()=" + childWidth);
-        int lineLeft = left + (childWidth - indicatorsWidth) / 2;
-//        line.setLeft(lineLeft);
-        FrameLayout.LayoutParams params = ((FrameLayout.LayoutParams) indicator.getLayoutParams());
-        params.leftMargin = lineLeft;
-        tempMargin = lineLeft;
-        indicator.setLayoutParams(params);
-        curIndex = i;
+        int left = getIndicatorLeft(position);
+        moveIndicatorTo(left);
+        tempMargin = left;
+        curIndex = position;
+        tempCurIndex = position;
+        switchViewPager(position);
+    }
+
+    private void makeIndicatorCenter() {
+        int indicatorLeft = indicator.getLeft();
+        View lastView = mContainer.getChildAt(mContainer.getChildCount() - 1);
+        if ((lastView.getRight() < getWidth()
+                || indicatorLeft < (getWidth() - indicator.getWidth()) / 2
+                || lastView.getRight() - indicator.getRight() < (getWidth() - indicator.getWidth()) / 2)
+                && (indicatorLeft - getWidth() / 2 > mScrollView.getScrollX()
+                && indicatorLeft - mScrollView.getScrollX() <= (getWidth() - indicator.getWidth()) / 2)) {
+            return;
+        }
+        int scrollTo = (indicatorLeft - getWidth() / 2) + indicator.getWidth() / 2;
+        mScrollView.smoothScrollTo(scrollTo, 0);
+    }
+
+    private void switchViewPager(int position) {
+        if (mViewPager != null && position >= 0 && position < mViewPager.getAdapter().getCount()) {
+            mViewPager.setCurrentItem(position);
+        }
     }
 
     public void reset() {
@@ -300,12 +386,44 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
     }
 
     private void cleanSelected(View view) {
-//        if (view instanceof ViewGroup) {
-//            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-//                cleanSelected(((ViewGroup) view).getChildAt(i));
-//            }
-//        }
         view.setSelected(false);
+    }
+
+    private int getIndicatorLeft(int position) {
+        View child = mContainer.getChildAt(position);
+        int childLeft = child.getLeft();
+        int childWidth = child.getMeasuredWidth();
+        int indicatorsWidth = indicator.getMeasuredWidth();
+        int left = childLeft + (childWidth - indicatorsWidth) / 2;
+        return left;
+    }
+
+    /**
+     * 移动指示器
+     *
+     * @param dx x方向的增量
+     */
+    private void moveIndicatorBy(int dx) {
+        if (indicator == null || !(indicator.getLayoutParams() instanceof MarginLayoutParams)) {
+            return;
+        }
+        MarginLayoutParams params = ((MarginLayoutParams) indicator.getLayoutParams());
+        params.leftMargin += dx;
+        indicator.setLayoutParams(params);
+    }
+
+    /**
+     * 移动指示器
+     *
+     * @param leftMargin x方向的偏移量
+     */
+    private void moveIndicatorTo(int leftMargin) {
+        if (indicator == null || !(indicator.getLayoutParams() instanceof MarginLayoutParams)) {
+            return;
+        }
+        MarginLayoutParams params = ((MarginLayoutParams) indicator.getLayoutParams());
+        params.leftMargin = leftMargin;
+        indicator.setLayoutParams(params);
     }
 
     public void setOnTabSelectListener(OnTabSelectListener listener) {
@@ -314,36 +432,6 @@ public class HorizontalScrollTabLayout extends RelativeLayout {
         }
     }
 
-    private void init(Context context, AttributeSet attrs) {
-        LayoutInflater.from(context).inflate(R.layout.tablayout, this);
-        mContainer = findViewById(R.id.container);
-        mContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                if (!mSetItemOnce) {
-                    setItem(curIndex);
-                    mSetItemOnce = true;
-                }
-            }
-        });
-        mScrollView = findViewById(R.id.scrollView);
-        indicator = findViewById(R.id.line);
-
-        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.HorizontalScrollTabLayout);
-        Drawable drawable = typedArray.getDrawable(R.styleable.HorizontalScrollTabLayout_indicatorDrawable);
-        indicator.setImageDrawable(drawable);
-
-        int indicatorWidth = typedArray.getDimensionPixelSize(R.styleable.HorizontalScrollTabLayout_indicatorWidth, (int) DensityUtil.dip2px(context, 20));
-        indicator.getLayoutParams().width = indicatorWidth;
-        int indicatorHeight = typedArray.getDimensionPixelSize(R.styleable.HorizontalScrollTabLayout_indicatorHeight, (int) DensityUtil.dip2px(context, 20));
-        indicator.getLayoutParams().height = indicatorHeight;
-        int indicatorPadding = typedArray.getDimensionPixelSize(R.styleable.HorizontalScrollTabLayout_indicatorPadding, 0);
-        ((FrameLayout.LayoutParams) indicator.getLayoutParams()).topMargin = indicatorPadding;
-
-        mLayoutMode = typedArray.getInt(R.styleable.HorizontalScrollTabLayout_layoutMode, 2);
-        mAverageMaxCount = typedArray.getInt(R.styleable.HorizontalScrollTabLayout_averageMaxCount, 3);
-        typedArray.recycle();
-    }
 
     public LinearLayout getContainer() {
         return mContainer;

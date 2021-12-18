@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
             view.setLayoutParams(layoutParams);
             tabLayout.addTab(view);
         }
+        //tabLayout.setItem(1);
 
     }
 
